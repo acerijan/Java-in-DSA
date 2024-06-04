@@ -57,7 +57,6 @@ class QueueLogic {
         if (start == null) {
             calledPatient = "empty queue";
         } else {
-            System.out.println("the queue has been updated");
             calledPatient = "patient no " + start.patientId + " please come forward";
             if (start.next == null) {
                 start = null;
@@ -187,24 +186,44 @@ public class HospitalQueueManagementSystem {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
-                ImageIcon icon = new ImageIcon("background.jpg");
+                ImageIcon icon = new ImageIcon("chill.jpg");
                 g.drawImage(icon.getImage(), 0, 0, getWidth(), getHeight(), this);
             }
         };
-        panel.setLayout(new FlowLayout());
+        panel.setLayout(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(10, 10, 10, 10);
 
         // Create login panel
-        loginPanel = new JPanel();
-        loginPanel.setLayout(new GridLayout(3, 2));
+        loginPanel = new JPanel(new GridBagLayout()) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                ImageIcon icon = new ImageIcon("chill.jpg");
+                g.drawImage(icon.getImage(), 0, 0, getWidth(), getHeight(), this);
+            }
+        };
         loginLabel = new JLabel("Staff Login");
+        loginLabel.setFont(new Font("Arial", Font.BOLD, 24));
+        loginLabel.setForeground(Color.WHITE);
         usernameField = new JTextField(20);
         passwordField = new JPasswordField(20);
         loginButton = new JButton("Login");
-        loginPanel.add(new JLabel("Username:"));
-        loginPanel.add(usernameField);
-        loginPanel.add(new JLabel("Password:"));
-        loginPanel.add(passwordField);
-        loginPanel.add(loginButton);
+
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        loginPanel.add(new JLabel("Username:"), gbc);
+        gbc.gridx = 1;
+        loginPanel.add(usernameField, gbc);
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        loginPanel.add(new JLabel("Password:"), gbc);
+        gbc.gridx = 1;
+        loginPanel.add(passwordField, gbc);
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        gbc.gridwidth = 2;
+        loginPanel.add(loginButton, gbc);
         loginButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -216,8 +235,12 @@ public class HospitalQueueManagementSystem {
         staffButton = new JButton("Click if staff");
         patientButton = new JButton("Click if patient");
         backButton = new JButton("Back");
-        panel.add(staffButton);
-        panel.add(patientButton);
+
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        panel.add(staffButton, gbc);
+        gbc.gridy = 1;
+        panel.add(patientButton, gbc);
         staffButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -232,13 +255,12 @@ public class HospitalQueueManagementSystem {
         });
 
         frame.add(panel);
-        frame.setSize(400, 400);
+        frame.setSize(800, 600);
         frame.setVisible(true);
     }
 
     private void showLoginPanel() {
         panel.removeAll();
-        panel.add(loginLabel);
         panel.add(loginPanel);
         frame.revalidate();
         frame.repaint();
@@ -247,7 +269,7 @@ public class HospitalQueueManagementSystem {
     private void authenticateStaff() {
         String username = usernameField.getText();
         String password = new String(passwordField.getPassword());
-        if (username.equals("admin") && password.equals("password")) {
+        if (username.equals("chill") && password.equals("chill")) {
             setStaffInterface();
         } else {
             JOptionPane.showMessageDialog(frame, "Invalid credentials", "Error", JOptionPane.ERROR_MESSAGE);
@@ -255,7 +277,7 @@ public class HospitalQueueManagementSystem {
     }
 
     public static void idTracker() {
-        try (DataInputStream d = new DataInputStream(new FileInputStream("tracker.txt"));) {
+        try (DataInputStream d = new DataInputStream(new FileInputStream("tracker.txt"))) {
             count = d.readInt();
             d.close();
         } catch (Exception e) {
@@ -264,7 +286,7 @@ public class HospitalQueueManagementSystem {
     }
 
     public static void idSetter() {
-        try (DataOutputStream d = new DataOutputStream(new FileOutputStream("tracker.txt"));) {
+        try (DataOutputStream d = new DataOutputStream(new FileOutputStream("tracker.txt"))) {
             d.writeInt(count);
             d.close();
         } catch (Exception e) {
@@ -278,143 +300,216 @@ public class HospitalQueueManagementSystem {
         searchButton = new JButton("Search via ID");
         viewListButton = new JButton("View entire list");
         callLabel = new JLabel("Result of action");
-        panel.add(admissionButton);
-        panel.add(searchButton);
-        panel.add(viewListButton);
-        panel.add(callLabel);
-        panel.add(backButton);
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(10, 10, 10, 10);
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        panel.add(admissionButton, gbc);
+        gbc.gridy = 1;
+        panel.add(searchButton, gbc);
+        gbc.gridy = 2;
+        panel.add(viewListButton, gbc);
+        gbc.gridy = 3;
+        panel.add(backButton, gbc);
+        gbc.gridy = 4;
+        panel.add(callLabel, gbc);
+
         admissionButton.addActionListener(new ActionListener() {
-            @Override
             public void actionPerformed(ActionEvent e) {
-                setAdmissionInterface();
+                admission();
             }
         });
         searchButton.addActionListener(new ActionListener() {
-            @Override
             public void actionPerformed(ActionEvent e) {
-                setSearchInterface();
+                search();
             }
         });
         viewListButton.addActionListener(new ActionListener() {
-            @Override
             public void actionPerformed(ActionEvent e) {
-                callLabel.setText("Refer command panel");
-                q.display();
+                viewList();
             }
         });
         backButton.addActionListener(new ActionListener() {
-            @Override
             public void actionPerformed(ActionEvent e) {
-                panel.removeAll();
-                panel.add(staffButton);
-                panel.add(patientButton);
+                setDefaultInterface();
             }
         });
+
+        frame.revalidate();
+        frame.repaint();
+    }
+
+    public void setDefaultInterface() {
+        panel.removeAll();
+        panel.add(staffButton);
+        panel.add(patientButton);
         frame.revalidate();
         frame.repaint();
     }
 
     public void setStaffInterface() {
         panel.removeAll();
-        callButton = new JButton("Call patient");
+        callButton = new JButton("Call next patient");
         viewListButton = new JButton("View entire list");
         callLabel = new JLabel("Result of action");
-        panel.add(callButton);
-        panel.add(viewListButton);
-        panel.add(callLabel);
-        panel.add(backButton);
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(10, 10, 10, 10);
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        panel.add(callButton, gbc);
+        gbc.gridy = 1;
+        panel.add(viewListButton, gbc);
+        gbc.gridy = 2;
+        panel.add(backButton, gbc);
+        gbc.gridy = 3;
+        panel.add(callLabel, gbc);
+
         callButton.addActionListener(new ActionListener() {
-            @Override
             public void actionPerformed(ActionEvent e) {
                 q.dequeue();
                 callLabel.setText(q.calledPatient);
             }
         });
         viewListButton.addActionListener(new ActionListener() {
-            @Override
             public void actionPerformed(ActionEvent e) {
-                callLabel.setText("Refer command panel");
-                q.display();
+                viewList();
             }
         });
         backButton.addActionListener(new ActionListener() {
-            @Override
             public void actionPerformed(ActionEvent e) {
-                panel.removeAll();
-                panel.add(staffButton);
-                panel.add(patientButton);
+                setDefaultInterface();
             }
         });
+
         frame.revalidate();
         frame.repaint();
     }
 
-    public void setSearchInterface() {
-        panel.removeAll();
-        id = new JTextField(20);
-        panel.add(id);
-        panel.add(searchButton);
-        panel.add(callLabel);
-        panel.add(backButton);
+    public void admission() {
+        JFrame admissionFrame = new JFrame("Patient Admission");
+        admissionFrame.setSize(400, 300);
+        admissionFrame.setLayout(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(10, 10, 10, 10);
 
-        searchButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                int id2 = Integer.parseInt(id.getText());
-                q.search(id2);
-                callLabel.setText("Refer command panel for details");
-            }
-        });
-        backButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                panel.removeAll();
-                setPatientInterface();
-            }
-        });
-        frame.revalidate();
-        frame.repaint();
-    }
-
-    public void setAdmissionInterface() {
-        panel.removeAll();
-        name = new JTextField("Enter name", 20);
-        age = new JTextField("Enter age", 10);
-        admit = new JButton("Admission");
-        r1 = new JRadioButton("Critical");
-        r2 = new JRadioButton("Not critical");
+        JLabel idLabel = new JLabel("ID:");
+        JLabel nameLabel = new JLabel("Name:");
+        JLabel ageLabel = new JLabel("Age:");
+        JLabel emergencyLabel = new JLabel("Emergency:");
+        id = new JTextField(10);
+        name = new JTextField(10);
+        age = new JTextField(10);
+        r1 = new JRadioButton("Yes");
+        r2 = new JRadioButton("No");
         grp = new ButtonGroup();
         grp.add(r1);
         grp.add(r2);
-        panel.add(name);
-        panel.add(age);
-        panel.add(r1);
-        panel.add(r2);
-        panel.add(admit);
-        panel.add(callLabel);
-        panel.add(backButton);
+        admit = new JButton("Admit");
+
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        admissionFrame.add(idLabel, gbc);
+        gbc.gridx = 1;
+        admissionFrame.add(id, gbc);
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        admissionFrame.add(nameLabel, gbc);
+        gbc.gridx = 1;
+        admissionFrame.add(name, gbc);
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        admissionFrame.add(ageLabel, gbc);
+        gbc.gridx = 1;
+        admissionFrame.add(age, gbc);
+        gbc.gridx = 0;
+        gbc.gridy = 3;
+        admissionFrame.add(emergencyLabel, gbc);
+        gbc.gridx = 1;
+        admissionFrame.add(r1, gbc);
+        gbc.gridx = 2;
+        admissionFrame.add(r2, gbc);
+        gbc.gridx = 1;
+        gbc.gridy = 4;
+        admissionFrame.add(admit, gbc);
+
         admit.addActionListener(new ActionListener() {
-            @Override
             public void actionPerformed(ActionEvent e) {
-                String s1 = name.getText();
-                int a1 = Integer.parseInt(age.getText());
-                count++;
-                boolean result = r1.isSelected();
-                Patient p = new Patient(count, s1, a1, result);
-                q.enqueue(p);
-                q.sort();
-                callLabel.setText("Your ID is: " + count);
+                admitPatient();
             }
         });
-        backButton.addActionListener(new ActionListener() {
-            @Override
+
+        admissionFrame.setVisible(true);
+    }
+
+    public void admitPatient() {
+        int idNum = Integer.parseInt(id.getText());
+        String nameText = name.getText();
+        int ageNum = Integer.parseInt(age.getText());
+        boolean emergency = r1.isSelected();
+
+        Patient newPatient = new Patient(idNum, nameText, ageNum, emergency);
+        q.enqueue(newPatient);
+        q.sort();
+
+        id.setText("");
+        name.setText("");
+        age.setText("");
+        grp.clearSelection();
+    }
+
+    public void search() {
+        JFrame searchFrame = new JFrame("Search Patient");
+        searchFrame.setSize(400, 200);
+        searchFrame.setLayout(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(10, 10, 10, 10);
+
+        JLabel idLabel = new JLabel("ID:");
+        JTextField idField = new JTextField(10);
+        JButton searchButton = new JButton("Search");
+
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        searchFrame.add(idLabel, gbc);
+        gbc.gridx = 1;
+        searchFrame.add(idField, gbc);
+        gbc.gridx = 1;
+        gbc.gridy = 1;
+        searchFrame.add(searchButton, gbc);
+
+        searchButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                panel.removeAll();
-                setPatientInterface();
+                int idNum = Integer.parseInt(idField.getText());
+                q.search(idNum);
             }
         });
-        frame.revalidate();
-        frame.repaint();
+
+        searchFrame.setVisible(true);
+    }
+
+    public void viewList() {
+        JFrame listFrame = new JFrame("Patient List");
+        listFrame.setSize(400, 400);
+        JTextArea textArea = new JTextArea();
+        textArea.setEditable(false);
+        JScrollPane scrollPane = new JScrollPane(textArea);
+        listFrame.add(scrollPane);
+
+        StringBuilder patientList = new StringBuilder();
+        Patient temp = q.start;
+        while (temp != null) {
+            patientList.append("ID: ").append(temp.patientId)
+                    .append(", Name: ").append(temp.patientName)
+                    .append(", Age: ").append(temp.age)
+                    .append(", Priority: ").append(temp.priority)
+                    .append("\n");
+            temp = temp.next;
+        }
+
+        textArea.setText(patientList.toString());
+        listFrame.setVisible(true);
     }
 
     public static void main(String[] args) {
