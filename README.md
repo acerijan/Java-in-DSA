@@ -1,4 +1,4 @@
 eti nai vanum yr
-features ajia thapna thalyo vaneta 1400 lines huna gaisakyo yr
-chill ma ni
-simple thinking high living -Mahatma Gandu
+Features ajia thapna thalyo vaneta 1400 lines huna gaisakyo yr
+Chill ma ni
+Simple thinking high living -Mahatma Gandu
