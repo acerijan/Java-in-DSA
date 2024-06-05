@@ -173,6 +173,10 @@ public class HospitalQueueManagementSystem {
         frame = new JFrame("Hospital Queue Management System");
         frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 
+        // Set the window icon
+        ImageIcon windowIcon = new ImageIcon("windowIcon.png");
+        frame.setIconImage(windowIcon.getImage());
+
         frame.addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent e) {
                 f.writer(q.start);
@@ -189,6 +193,7 @@ public class HospitalQueueManagementSystem {
                 ImageIcon icon = new ImageIcon("chill.jpeg");
                 g.drawImage(icon.getImage(), 0, 0, getWidth(), getHeight(), this);
             }
+
             @Override
             public Dimension getPreferredSize() {
                 return new Dimension(800, 600); // Set the preferred size
