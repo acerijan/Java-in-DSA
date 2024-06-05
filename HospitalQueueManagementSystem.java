@@ -432,9 +432,9 @@ public class HospitalQueueManagementSystem {
         boolean emergency = r1.isSelected();
         count++;
         p = new Patient(count, pname, page, emergency);
+        JOptionPane.showMessageDialog(frame, "Patient Admitted: \nID: " + p.patientId + "\nName: " + p.patientName + "\nAge: " + p.age + "\nPriority: " + p.priority);
         q.enqueue(p);
         q.sort();
-        JOptionPane.showMessageDialog(frame, "Patient Admitted: \nID: " + p.patientId + "\nName: " + p.patientName + "\nAge: " + p.age + "\nPriority: " + p.priority);
         setPatientInterface();  // Go back to the patient interface after admitting the patient
     }
 
