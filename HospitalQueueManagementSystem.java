@@ -92,19 +92,23 @@ class QueueLogic {
         }
     }
 
-    public void search(int p,JLabel lbl) {
+    public void search(int p, JLabel lbl) {
         int pos = 1;
-        boolean hasId=false;
+        boolean hasId = false;
         temp = start;
         while (temp != null) {
-            if (p == temp.patientId) {hasId=true;
-                lbl.setText("id:"+temp.patientId+"name:"+temp.patientName+"age:"+temp.age+"position:"+pos);
+            if (p == temp.patientId) {
+                hasId = true;
+                String message = "ID: " + temp.patientId + "\nName: " + temp.patientName + "\nAge: " + temp.age + "\nPosition: " + pos;
+                JOptionPane.showMessageDialog(null, message, "Patient Details", JOptionPane.INFORMATION_MESSAGE);
+                break; // Assuming we want to show details for only the first match
             }
             pos++;
             temp = temp.next;
         }
-        if(!hasId)
-        {lbl.setText("no patient");}
+        if (!hasId) {
+            JOptionPane.showMessageDialog(null, "No patient found", "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }
 }
 
@@ -182,8 +186,12 @@ public class HospitalQueueManagementSystem {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
-                ImageIcon icon = new ImageIcon("chill.jpg");
+                ImageIcon icon = new ImageIcon("chill.jpeg");
                 g.drawImage(icon.getImage(), 0, 0, getWidth(), getHeight(), this);
+            }
+            @Override
+            public Dimension getPreferredSize() {
+                return new Dimension(800, 600); // Set the preferred size
             }
         };
         panel.setLayout(new GridBagLayout());
@@ -302,33 +310,47 @@ public class HospitalQueueManagementSystem {
         gbc.gridx = 0;
         gbc.gridy = 0;
         panel.add(admissionButton, gbc);
-        gbc.gridy = 1;
+        gbc.gridx = 1;
         panel.add(searchButton, gbc);
-        gbc.gridy = 2;
+        gbc.gridx = 2;
         panel.add(viewListButton, gbc);
-        gbc.gridy = 3;
-        panel.add(backButton, gbc);
-        gbc.gridy = 4;
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        gbc.gridwidth = 3;
         panel.add(callLabel, gbc);
+        gbc.gridy = 2;
+        gbc.gridwidth = 1;
+        panel.add(backButton, gbc);
 
         admissionButton.addActionListener(new ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent e) {
-                admission();
+                setAdmission();
             }
         });
+
         searchButton.addActionListener(new ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent e) {
-                search();
+                searchPatient();
             }
         });
+
         viewListButton.addActionListener(new ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent e) {
-                viewList();
+                displayPatients();
             }
         });
+
         backButton.addActionListener(new ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent e) {
-                setDefaultInterface();
+                panel.removeAll();
+                panel.add(staffButton);
+                panel.add(patientButton);
+                frame.revalidate();
+                frame.repaint();
             }
         });
 
@@ -336,13 +358,81 @@ public class HospitalQueueManagementSystem {
         frame.repaint();
     }
 
-    public void setDefaultInterface() {
+    public void setAdmission() {
         panel.removeAll();
-        panel.add(staffButton);
-        panel.add(patientButton);
+        JLabel nameLabel = new JLabel("Name:");
+        JLabel ageLabel = new JLabel("Age:");
+        JLabel emergencyLabel = new JLabel("Emergency:");
+
+        name = new JTextField(20);
+        age = new JTextField(20);
+        r1 = new JRadioButton("Yes");
+        r2 = new JRadioButton("No");
+        grp = new ButtonGroup();
+        grp.add(r1);
+        grp.add(r2);
+
+        admit = new JButton("Admit");
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(10, 10, 10, 10);
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        panel.add(nameLabel, gbc);
+        gbc.gridx = 1;
+        panel.add(name, gbc);
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        panel.add(ageLabel, gbc);
+        gbc.gridx = 1;
+        panel.add(age, gbc);
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        panel.add(emergencyLabel, gbc);
+        gbc.gridx = 1;
+        panel.add(r1, gbc);
+        gbc.gridx = 2;
+        panel.add(r2, gbc);
+        gbc.gridx = 0;
+        gbc.gridy = 3;
+        gbc.gridwidth = 3;
+        panel.add(admit, gbc);
+
+        gbc.gridy = 4;
+        gbc.gridwidth = 1;
+        panel.add(backButton, gbc);
+
+        admit.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                admitPatient();
+            }
+        });
+
+        backButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                setPatientInterface();
+            }
+        });
+
         frame.revalidate();
         frame.repaint();
     }
+
+
+    public void admitPatient() {
+        String pname = name.getText();
+        int page = Integer.parseInt(age.getText());
+        boolean emergency = r1.isSelected();
+        count++;
+        p = new Patient(count, pname, page, emergency);
+        q.enqueue(p);
+        q.sort();
+        JOptionPane.showMessageDialog(frame, "Patient Admitted: \nID: " + p.patientId + "\nName: " + p.patientName + "\nAge: " + p.age + "\nPriority: " + p.priority);
+        setPatientInterface();  // Go back to the patient interface after admitting the patient
+    }
+
 
     public void setStaffInterface() {
         panel.removeAll();
@@ -355,27 +445,39 @@ public class HospitalQueueManagementSystem {
         gbc.gridx = 0;
         gbc.gridy = 0;
         panel.add(callButton, gbc);
-        gbc.gridy = 1;
+        gbc.gridx = 1;
         panel.add(viewListButton, gbc);
-        gbc.gridy = 2;
-        panel.add(backButton, gbc);
-        gbc.gridy = 3;
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        gbc.gridwidth = 2;
         panel.add(callLabel, gbc);
+        gbc.gridy = 2;
+        gbc.gridwidth = 1;
+        panel.add(backButton, gbc);
 
         callButton.addActionListener(new ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent e) {
                 q.dequeue();
                 callLabel.setText(q.calledPatient);
             }
         });
+
         viewListButton.addActionListener(new ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent e) {
-                viewList();
+                displayPatients();
             }
         });
+
         backButton.addActionListener(new ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent e) {
-                setDefaultInterface();
+                panel.removeAll();
+                panel.add(staffButton);
+                panel.add(patientButton);
+                frame.revalidate();
+                frame.repaint();
             }
         });
 
@@ -383,132 +485,80 @@ public class HospitalQueueManagementSystem {
         frame.repaint();
     }
 
-    public void admission() {
-        JFrame admissionFrame = new JFrame("Patient Admission");
-        admissionFrame.setSize(400, 300);
-        admissionFrame.setLayout(new GridBagLayout());
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(10, 10, 10, 10);
-
-        //JLabel idLabel = new JLabel("ID:");
-        JLabel nameLabel = new JLabel("Name:");
-        JLabel ageLabel = new JLabel("Age:");
-        JLabel emergencyLabel = new JLabel("Emergency:");
-        //id = new JTextField(10);
-        name = new JTextField(10);
-        age = new JTextField(10);
-        r1 = new JRadioButton("Yes");
-        r2 = new JRadioButton("No");
-        grp = new ButtonGroup();
-        grp.add(r1);
-        grp.add(r2);
-        admit = new JButton("Admit");
-
-        //gbc.gridx = 0;
-        //gbc.gridy = 0;
-        //admissionFrame.add(idLabel, gbc);
-        //gbc.gridx = 1;
-        //admissionFrame.add(id, gbc);
-        gbc.gridx = 0;
-        gbc.gridy = 1;
-        admissionFrame.add(nameLabel, gbc);
-        gbc.gridx = 1;
-        admissionFrame.add(name, gbc);
-        gbc.gridx = 0;
-        gbc.gridy = 2;
-        admissionFrame.add(ageLabel, gbc);
-        gbc.gridx = 1;
-        admissionFrame.add(age, gbc);
-        gbc.gridx = 0;
-        gbc.gridy = 3;
-        admissionFrame.add(emergencyLabel, gbc);
-        gbc.gridx = 1;
-        admissionFrame.add(r1, gbc);
-        gbc.gridx = 2;
-        admissionFrame.add(r2, gbc);
-        gbc.gridx = 1;
-        gbc.gridy = 4;
-        admissionFrame.add(admit, gbc);
-
-        admit.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                admitPatient();
-            }
-        });
-
-        admissionFrame.setVisible(true);
-    }
-
-    public void admitPatient() {
-        count++;
-        String nameText = name.getText();
-        int ageNum = Integer.parseInt(age.getText());
-        boolean emergency = r1.isSelected();
-
-        Patient newPatient = new Patient(count, nameText, ageNum, emergency);
-        q.enqueue(newPatient);
-        q.sort();
-
-        //id.setText("");
-        name.setText("");
-        age.setText("");
-        grp.clearSelection();
-    }
-
-    public void search() {
-        JFrame searchFrame = new JFrame("Search Patient");
-        searchFrame.setSize(400, 200);
-        searchFrame.setLayout(new GridBagLayout());
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(10, 10, 10, 10);
-
-        JLabel idLabel = new JLabel("ID:");
-        JTextField idField = new JTextField(10);
+    public void searchPatient() {
+        panel.removeAll();
+        JLabel searchLabel = new JLabel("Enter ID:");
+        JTextField searchField = new JTextField(20);
         JButton searchButton = new JButton("Search");
-        JLabel resultOfSearch=new JLabel("your result");
+        callLabel = new JLabel("Result of action");
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(10, 10, 10, 10);
         gbc.gridx = 0;
         gbc.gridy = 0;
-        searchFrame.add(idLabel, gbc);
+        panel.add(searchLabel, gbc);
         gbc.gridx = 1;
-        searchFrame.add(idField, gbc);
-        gbc.gridx = 1;
+        panel.add(searchField, gbc);
+        gbc.gridx = 2;
+        panel.add(searchButton, gbc);
+        gbc.gridx = 0;
         gbc.gridy = 1;
-        searchFrame.add(searchButton, gbc);
-        gbc.gridx= 1;
-        gbc.gridy= 2;
-        searchFrame.add(resultOfSearch,gbc);
+        gbc.gridwidth = 3;
+        panel.add(callLabel, gbc);
+        gbc.gridy = 2;
+        gbc.gridwidth = 1;
+        panel.add(backButton, gbc);
 
         searchButton.addActionListener(new ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent e) {
-                int idNum = Integer.parseInt(idField.getText());
-                q.search(idNum,resultOfSearch);
+                int id = Integer.parseInt(searchField.getText());
+                q.search(id, callLabel);
             }
         });
 
-        searchFrame.setVisible(true);
+        backButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                setPatientInterface();
+            }
+        });
+
+        frame.revalidate();
+        frame.repaint();
     }
 
-    public void viewList() {
-        JFrame listFrame = new JFrame("Patient List");
-        listFrame.setSize(400, 400);
-        JTextArea textArea = new JTextArea();
+    public void displayPatients() {
+        panel.removeAll();
+        JTextArea textArea = new JTextArea(20, 50);
         textArea.setEditable(false);
         JScrollPane scrollPane = new JScrollPane(textArea);
-        listFrame.add(scrollPane);
-
-        StringBuilder patientList = new StringBuilder();
         Patient temp = q.start;
+
         while (temp != null) {
-            patientList.append("ID: ").append(temp.patientId)
-                    .append(", Name: ").append(temp.patientName)
-                    .append(", Age: ").append(temp.age)
-                    .append(", Priority: ").append(temp.priority)
-                    .append("\n");
+            textArea.append("ID: " + temp.patientId + ", Name: " + temp.patientName + ", Age: " + temp.age + ", Priority: " + temp.priority + "\n");
             temp = temp.next;
         }
 
-        textArea.setText(patientList.toString());
-        listFrame.setVisible(true);
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(10, 10, 10, 10);
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.gridwidth = 3;
+        panel.add(scrollPane, gbc);
+        gbc.gridy = 1;
+        gbc.gridwidth = 1;
+        panel.add(backButton, gbc);
+
+        backButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                setPatientInterface();
+            }
+        });
+
+        frame.revalidate();
+        frame.repaint();
     }
 
     public static void main(String[] args) {
