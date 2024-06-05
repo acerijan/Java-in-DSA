@@ -92,23 +92,19 @@ class QueueLogic {
         }
     }
 
-    public void search(int p) {
+    public void search(int p,JLabel lbl) {
         int pos = 1;
+        boolean hasId=false;
         temp = start;
-        if (start == null) {
-            System.out.println("empty queue");
-        }
-        System.out.println("your info is");
         while (temp != null) {
-            if (p == temp.patientId) {
-                System.out.println(temp.patientId);
-                System.out.println(temp.patientName);
-                System.out.println(temp.age);
-                System.out.println("position is " + pos + "\n");
+            if (p == temp.patientId) {hasId=true;
+                lbl.setText("id:"+temp.patientId+"name:"+temp.patientName+"age:"+temp.age+"position:"+pos);
             }
             pos++;
             temp = temp.next;
         }
+        if(!hasId)
+        {lbl.setText("no patient");}
     }
 }
 
@@ -159,7 +155,7 @@ public class HospitalQueueManagementSystem {
     private JButton admissionButton, admit;
     private JButton searchButton;
     private JButton backButton;
-    private JTextField id, usernameField;
+    private JTextField usernameField;
     private JPasswordField passwordField;
     private JTextField name, age;
     private JRadioButton r1, r2;
@@ -394,11 +390,11 @@ public class HospitalQueueManagementSystem {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(10, 10, 10, 10);
 
-        JLabel idLabel = new JLabel("ID:");
+        //JLabel idLabel = new JLabel("ID:");
         JLabel nameLabel = new JLabel("Name:");
         JLabel ageLabel = new JLabel("Age:");
         JLabel emergencyLabel = new JLabel("Emergency:");
-        id = new JTextField(10);
+        //id = new JTextField(10);
         name = new JTextField(10);
         age = new JTextField(10);
         r1 = new JRadioButton("Yes");
@@ -408,11 +404,11 @@ public class HospitalQueueManagementSystem {
         grp.add(r2);
         admit = new JButton("Admit");
 
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        admissionFrame.add(idLabel, gbc);
-        gbc.gridx = 1;
-        admissionFrame.add(id, gbc);
+        //gbc.gridx = 0;
+        //gbc.gridy = 0;
+        //admissionFrame.add(idLabel, gbc);
+        //gbc.gridx = 1;
+        //admissionFrame.add(id, gbc);
         gbc.gridx = 0;
         gbc.gridy = 1;
         admissionFrame.add(nameLabel, gbc);
@@ -444,16 +440,16 @@ public class HospitalQueueManagementSystem {
     }
 
     public void admitPatient() {
-        int idNum = Integer.parseInt(id.getText());
+        count++;
         String nameText = name.getText();
         int ageNum = Integer.parseInt(age.getText());
         boolean emergency = r1.isSelected();
 
-        Patient newPatient = new Patient(idNum, nameText, ageNum, emergency);
+        Patient newPatient = new Patient(count, nameText, ageNum, emergency);
         q.enqueue(newPatient);
         q.sort();
 
-        id.setText("");
+        //id.setText("");
         name.setText("");
         age.setText("");
         grp.clearSelection();
@@ -469,7 +465,7 @@ public class HospitalQueueManagementSystem {
         JLabel idLabel = new JLabel("ID:");
         JTextField idField = new JTextField(10);
         JButton searchButton = new JButton("Search");
-
+        JLabel resultOfSearch=new JLabel("your result");
         gbc.gridx = 0;
         gbc.gridy = 0;
         searchFrame.add(idLabel, gbc);
@@ -478,11 +474,14 @@ public class HospitalQueueManagementSystem {
         gbc.gridx = 1;
         gbc.gridy = 1;
         searchFrame.add(searchButton, gbc);
+        gbc.gridx= 1;
+        gbc.gridy= 2;
+        searchFrame.add(resultOfSearch,gbc);
 
         searchButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 int idNum = Integer.parseInt(idField.getText());
-                q.search(idNum);
+                q.search(idNum,resultOfSearch);
             }
         });
 
