@@ -203,7 +203,7 @@ public class HospitalQueueManagementSystem {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
-                ImageIcon icon = new ImageIcon("chill1.jpg");
+                ImageIcon icon = new ImageIcon("chill1.jpeg");
                 g.drawImage(icon.getImage(), 0, 0, getWidth(), getHeight(), this);
             }
         };
